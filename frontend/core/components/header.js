@@ -103,7 +103,12 @@ export default function Header({ data }) {
                 <Container maxWidth="lg">
                     <Toolbar className={classes.toolbarSecondary}>
                         <List className={classes.menuList}>
-
+                            {data.map((category) => (
+                                <ListItem key={category.name} className={classes.menuListItem}>
+                                    <Link href={`/category/${encodeURIComponent(category.slug)}`}>
+                                        <a className={classes.listItemLink}>{category.name}</a></Link>
+                                </ListItem>
+                            ))}
                         </List>
                     </Toolbar>
                 </Container>

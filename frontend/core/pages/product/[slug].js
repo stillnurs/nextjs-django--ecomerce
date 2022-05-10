@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Product({ post }) {
+function Product({ post, categories }) {
     const classes = useStyles();
     const router = useRouter();
 
@@ -53,7 +53,7 @@ function Product({ post }) {
             <Head>
                 <title>{post.title.toTitle()}</title>
             </Head>
-            <Header />
+            <Header data={categories} />
             <Container maxWidth="md">
                 <Grid container spacing={0}>
                     <Hidden only={["xs", "sm"]}>
@@ -113,9 +113,13 @@ export async function getStaticProps({ params }) {
     const res = await fetch(`http://127.0.0.1:8000/api/${params.slug}`);
     const post = await res.json();
 
+    const ress = await fetch("http://127.0.0.1:8000/api/category/");
+    const categories = await ress.json();
+
     return {
         props: {
             post,
+            categories
         },
     };
 }

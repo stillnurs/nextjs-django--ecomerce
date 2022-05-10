@@ -1,10 +1,11 @@
-import { makeStyles } from "@mui/styles"
+import { makeStyles } from "@mui/styles";
 import {
   Container, Grid, Card, CardMedia,
   CardContent, Typography, Box
 } from "@mui/material";
-import Link from "next/link"
-import Header from "../components/header"
+import Link from "next/link";
+import Header from "../../components/header";
+import { useRouter } from "next/router";
 
 const useStyles = makeStyles((theme) => ({
   example: {
@@ -24,10 +25,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function Home({ posts, categories }) {
+function Category({ posts, categories }) {
 
   const classes = useStyles();
+  const router = useRouter();
 
+  if (router.isFallback) {
+    return <div>Loading...</div>;
+  }
   return (
     <>
       <Header data={categories} />
@@ -64,10 +69,17 @@ function Home({ posts, categories }) {
   )
 }
 
-export async function getStaticProps() {
+export async function getStaticPaths() {
+  return {
+    paths: [{ params: { slug: "shoes" } }],
+    fallback: true,
+  }
+}
 
-  const res = await fetch("http://127.0.0.1:8000/api/")
-  const posts = await res.json()
+export async function getStaticProps({ params }) {
+
+  const res = await fetch(`http://127.0.0.1:8000/api/category/${params.slug}`);
+  const posts = await res.json();
 
   const ress = await fetch("http://127.0.0.1:8000/api/category/");
   const categories = await ress.json();
@@ -75,9 +87,9 @@ export async function getStaticProps() {
   return {
     props: {
       posts,
-      categories,
+      categories
     }
   };
 }
 
-export default Home;
+export default Category;
