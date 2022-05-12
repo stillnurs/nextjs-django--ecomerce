@@ -1,14 +1,19 @@
-import { makeStyles } from "@mui/styles"
+import { makeStyles } from "@mui/styles";
 import {
-  Container, Grid, Card, CardMedia,
-  CardContent, Typography, Box
+  Container,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Box,
 } from "@mui/material";
-import Link from "next/link"
-import Header from "../components/header"
+import Link from "next/link";
+import Header from "../components/header";
 
 const useStyles = makeStyles((theme) => ({
   example: {
-    color: "red"
+    color: "red",
   },
   cardGrid: {
     paddingBottom: theme.spacing(8),
@@ -17,15 +22,14 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    borderRadius: "0"
+    borderRadius: "0",
   },
   cardMedia: {
-    paddingTop: "140%"
-  }
+    paddingTop: "140%",
+  },
 }));
 
 function Home({ posts, categories }) {
-
   const classes = useStyles();
 
   return (
@@ -36,7 +40,10 @@ function Home({ posts, categories }) {
           <Grid container spacing={2}>
             {console.log(posts)}
             {posts.map((post) => (
-              <Link key={post.id} href={`product/${encodeURIComponent(post.slug)}`}>
+              <Link
+                key={post.id}
+                href={`product/${encodeURIComponent(post.slug)}`}
+              >
                 <Grid item xs={6} sm={4} md={3}>
                   <Card>
                     <CardMedia
@@ -61,13 +68,12 @@ function Home({ posts, categories }) {
         </Container>
       </main>
     </>
-  )
+  );
 }
 
 export async function getStaticProps() {
-
-  const res = await fetch("http://127.0.0.1:8000/api/")
-  const posts = await res.json()
+  const res = await fetch("http://127.0.0.1:8000/api/");
+  const posts = await res.json();
 
   const ress = await fetch("http://127.0.0.1:8000/api/category/");
   const categories = await ress.json();
@@ -76,7 +82,7 @@ export async function getStaticProps() {
     props: {
       posts,
       categories,
-    }
+    },
   };
 }
 
