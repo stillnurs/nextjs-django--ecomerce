@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import Header from "../components/header";
+import { gql } from "@apollo/client";
+import client from "./api/apollo-client";
 
 const useStyles = makeStyles((theme) => ({
   example: {
@@ -29,17 +31,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Home({ posts, categories }) {
+function Home({ categories, data }) {
   const classes = useStyles();
 
   return (
     <>
+      {console.log(data)}
       <Header data={categories} />
       <main>
         <Container className={classes.cardGrid} maxWidth="lg">
           <Grid container spacing={2}>
-            {console.log(posts)}
-            {posts.map((post) => (
+            {data.map((post) => (
               <Link
                 key={post.id}
                 href={`product/${encodeURIComponent(post.slug)}`}
@@ -48,16 +50,16 @@ function Home({ posts, categories }) {
                   <Card>
                     <CardMedia
                       className={classes.cardMedia}
-                      image={post.product_image[0].image}
+                      image={post.productImage[0].image}
                       title="Image title"
-                      alt={post.product_image[0].alt_text}
+                      alt={post.productImage[0].altText}
                     />
                     <CardContent>
                       <Typography gutterBottom component="p">
                         {post.title}
                       </Typography>
                       <Box component="p" fontSize={16} fontWeight={900}>
-                        ${post.regular_price}
+                        ${post.regularPrice}
                       </Box>
                     </CardContent>
                   </Card>
@@ -72,16 +74,40 @@ function Home({ posts, categories }) {
 }
 
 export async function getStaticProps() {
-  const res = await fetch("http://127.0.0.1:8000/api/");
-  const posts = await res.json();
+  const categories = await client.query({
+    query: gql`
+      query Categories {
+        allCategories {
+          id
+          name
+          slug
+        }
+      }
+    `,
+  });
 
-  const ress = await fetch("http://127.0.0.1:8000/api/category/");
-  const categories = await ress.json();
+  const { data } = await client.query({
+    query: gql`
+      query all_Products {
+        allProducts {
+          title
+          description
+          regularPrice
+          slug
+          productImage {
+            id
+            image
+            altText
+          }
+        }
+      }
+    `,
+  });
 
   return {
     props: {
-      posts,
-      categories,
+      data: data.allProducts,
+      categories: categories.data.allCategories,
     },
   };
 }
