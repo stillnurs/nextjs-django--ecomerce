@@ -1,7 +1,4 @@
-from django.shortcuts import render
 from rest_framework import generics
-
-from store import serializers
 
 from . import models
 from .models import Category, Product

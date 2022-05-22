@@ -86,7 +86,9 @@ class Product(models.Model):
     """
 
     product_type = models.ForeignKey(ProductType, on_delete=models.RESTRICT)
-    category = models.ForeignKey(Category, on_delete=models.RESTRICT)
+    category = models.ForeignKey(
+        Category, on_delete=models.RESTRICT, related_name="category"
+    )
     title = models.CharField(
         verbose_name=_("title"), help_text=_("Required"), max_length=255
     )
@@ -177,6 +179,7 @@ class ProductImage(models.Model):
         max_length=255,
         null=True,
         blank=True,
+        default="No Photo",
     )
     is_feature = models.BooleanField(default=False)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
