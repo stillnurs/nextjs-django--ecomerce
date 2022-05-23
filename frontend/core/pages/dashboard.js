@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { userDetails } from "../app/api/graphql";
+import { useAuthentication } from "../app/api/authorization";
 
-const Dashboard = () => {
-  const [whoami, setWhoami] = useState("I dont't know!");
-  const [error, setError] = useState("");
+function Dashboard() {
+  const { isSignedIn } = useAuthentication();
 
-  useEffect(() => {
-    fetch("http://localhost:8000/account/whoami/", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setWhoami(data.username);
-      })
-      .catch((err) => {
-        console.log(err);
-        setError("You are not logged in");
-      });
-  }, []);
-
-  return <div className="container">{whoami}</div>;
-};
+  function Check() {
+    if (isSignedIn) return <>YOU ARE SIGNED IN!</>;
+  }
+  const { data, loading } = useQuery(userDetails);
+  if (loading) {
+    return <> Page Loading... </>;
+  }
+  return (
+    <>
+      <Check />
+      Logged in as {data.userDetails[0].username.toTitle()}.
+    </>
+  );
+}
 
 export default Dashboard;

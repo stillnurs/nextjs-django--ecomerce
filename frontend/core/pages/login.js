@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Router from "next/router";
 import { Avatar } from "@mui/material";
 import { Button } from "@mui/material";
@@ -14,6 +14,7 @@ import { Container } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useMachine } from "@xstate/react";
 import { Machine } from "xstate";
+import { useAuthentication } from "../app/api/authorization";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -48,55 +49,19 @@ const toggleMachine = Machine({
   },
 });
 
-const Login = () => {
+const SignIn = () => {
   const classes = useStyles();
 
-  const [csrfToken, setscrf] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [state, send] = useMachine(toggleMachine);
+  const { signIn } = useAuthentication();
 
-  React.useEffect(() => {
-    fetch("http://localhost:8000/account/csrf/", {
-      credentials: "include",
-    })
-      .then((res) => {
-        let csrfToken = res.headers.get("X-CSRFToken");
-        setscrf(csrfToken);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
-  function handleSubmit(e) {
+  function onSubmit(e) {
     e.preventDefault();
-    fetch("http://localhost:8000/account/login/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrfToken,
-      },
-      credentials: "include",
-      body: JSON.stringify({ username: username, password: password }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Connecting problem");
-        }
-      })
-      .then((data) => {
-        console.log(data);
-        send("TOGGLE");
-        // Router.push("/dashboard");
-      })
-      .catch((err) => {
-        console.log(err);
-        setError("Username or password Incorrect");
-      });
+    signIn({ username, password });
   }
-  console.log(state.value);
 
   return (
     <>
@@ -110,7 +75,7 @@ const Login = () => {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <form className={classes.form} onSubmit={handleSubmit} noValidate>
+          <form className={classes.form} onSubmit={onSubmit} noValidate>
             <TextField
               variant="outlined"
               margin="normal"
@@ -169,4 +134,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignIn;

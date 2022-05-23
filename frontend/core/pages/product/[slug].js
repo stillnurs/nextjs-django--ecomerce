@@ -4,7 +4,9 @@ import { Container, Paper, Grid, Box, Hidden } from "@mui/material";
 import Head from "next/head";
 import Header from "../../components/header";
 import { gql } from "@apollo/client";
-import client from "../api/apollo-client";
+import client from "../../app/api/apollo-client";
+import { allCatQuery, singleProductQuery } from "../../app/api/graphql";
+import newApolloClient from "../../app/api/apollo-client";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,7 +53,6 @@ function Product({ post, categories }) {
 
   return (
     <>
-      {console.log(post)}
       <Head>
         <title>{post.title.toTitle()}</title>
       </Head>
@@ -90,7 +91,7 @@ function Product({ post, categories }) {
                 {post.title}
               </Box>
               <Box component="p" fontSize={22} fontWeight="900">
-                ${post.regular_price}
+                ${post.regularPrice}
               </Box>
               <Box component="p" m={0} fontSize={14}>
                 Free Delivery & Returns (Ts&Cs apply)
@@ -112,43 +113,22 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const categories = await client.query({
-    query: gql`
-      query Categories {
-        allCategories {
-          id
-          name
-          slug
-        }
-      }
-    `,
+  const client = newApolloClient();
+
+  const qry1 = await client.query({
+    query: allCatQuery,
   });
 
-  const product_data = gql`
-    query ($slug: String!) {
-      allProductsByName(slug: $slug) {
-        title
-        description
-        regularPrice
-        productImage {
-          id
-          image
-          altText
-        }
-      }
-    }
-  `;
-
   const slug = params.slug;
-  const { data } = await client.query({
-    query: product_data,
+  const qry2 = await client.query({
+    query: singleProductQuery,
     variables: { slug },
   });
 
   return {
     props: {
-      post: data.allProductsByName,
-      categories: categories.data.allCategories,
+      post: qry2.data.allProductsByName,
+      categories: qry1.data.allCategories,
     },
   };
 }

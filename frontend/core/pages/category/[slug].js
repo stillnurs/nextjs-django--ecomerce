@@ -12,7 +12,9 @@ import Link from "next/link";
 import Header from "../../components/header";
 import { useRouter } from "next/router";
 import { gql } from "@apollo/client";
-import client from "../api/apollo-client";
+import client from "../../app/api/apollo-client";
+import { allCatQuery, productsByCategory } from "../../app/api/graphql";
+import newApolloClient from "../../app/api/apollo-client";
 
 const useStyles = makeStyles((theme) => ({
   example: {
@@ -41,7 +43,6 @@ function Category({ posts, categories }) {
   }
   return (
     <>
-      {console.log(posts)}
       <Header data={categories} />
       <main>
         <Container className={classes.cardGrid} maxWidth="lg">
@@ -86,44 +87,22 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const categories = await client.query({
-    query: gql`
-      query Categories {
-        allCategories {
-          id
-          name
-          slug
-        }
-      }
-    `,
+  const client = newApolloClient();
+
+  const qry1 = await client.query({
+    query: allCatQuery,
   });
 
-  const all_products = gql`
-    query ($name: String!) {
-      categoryByName(name: $name) {
-        id
-        category {
-          id
-          title
-          productImage {
-            id
-            image
-            altText
-          }
-        }
-      }
-    }
-  `;
   const name = params.slug;
-  const { data } = await client.query({
-    query: all_products,
+  const qry2 = await client.query({
+    query: productsByCategory,
     variables: { name },
   });
 
   return {
     props: {
-      posts: data.categoryByName.category,
-      categories: categories.data.allCategories,
+      posts: qry2.data.categoryByName.category,
+      categories: qry1.data.allCategories,
     },
   };
 }
